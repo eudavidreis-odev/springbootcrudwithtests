@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.davidreisodev.springbootcrud.dtos.AddressRecordDto;
-import com.davidreisodev.springbootcrud.dtos.PersonRegisterRecordDto;
+import com.davidreisodev.springbootcrud.dtos.PersonRecordDto;
 import com.davidreisodev.springbootcrud.models.AddressModel;
 import com.davidreisodev.springbootcrud.models.PersonModel;
 import com.davidreisodev.springbootcrud.repositories.AddressRepository;
@@ -43,7 +43,7 @@ public class MainServiceTest {
     @Mock
     MainService serviceMock;
 
-    PersonRegisterRecordDto personRegisterDto;
+    PersonRecordDto personRegisterDto;
     
     AddressModel address1,address2,address3;
     
@@ -92,7 +92,7 @@ public class MainServiceTest {
         addressModelList2.add(address1); 
 
         addressRecordDto = new AddressRecordDto("Avenida Bandeirantes","12440-457","555","Pindamonhangaba",true);
-        personRegisterDto = new PersonRegisterRecordDto("David Reis",dateDavid,addressModelList1);
+        personRegisterDto = new PersonRecordDto("David Reis",dateDavid,addressModelList1);
         
 
         personModel1 = new PersonModel("David Reis",dateDavid,addressModelList1);

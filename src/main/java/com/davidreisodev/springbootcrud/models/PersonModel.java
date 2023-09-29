@@ -17,6 +17,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+/**
+ * PersonModel é o modelo de dados da tabela tb_person, onde serão armazenados os dados das pessoas.
+ * Esta classe é extendida da classe RepresentationModel, que é a classe que contém os métodos que facilitam a manipulação dos dados.
+ * 
+ * @see RepresentationModel
+ */
 @Entity
 @Table(name = "tb_person")
 public class PersonModel extends RepresentationModel<PersonModel> implements Serializable{
@@ -45,6 +51,10 @@ public class PersonModel extends RepresentationModel<PersonModel> implements Ser
     }
 
     
+    
+    /** 
+     * @return long
+     */
     public static long getSerialversionuid() {
         return serialVersionUID;
     }

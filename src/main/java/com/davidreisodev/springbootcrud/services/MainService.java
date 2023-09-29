@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
-import com.davidreisodev.springbootcrud.controllers.PersonController;
+import com.davidreisodev.springbootcrud.controllers.MainController;
 import com.davidreisodev.springbootcrud.dtos.AddressRecordDto;
-import com.davidreisodev.springbootcrud.dtos.PersonRegisterRecordDto;
+import com.davidreisodev.springbootcrud.dtos.PersonRecordDto;
 import com.davidreisodev.springbootcrud.models.AddressModel;
 import com.davidreisodev.springbootcrud.models.PersonModel;
 import com.davidreisodev.springbootcrud.repositories.AddressRepository;
@@ -20,6 +20,15 @@ import java.util.ArrayList;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
+/**
+ * MainService é a classe que executa a lógica de negócio, ela recebe a anotação @Service, e também é responsável por fazer 
+ * o intermédio entre a camada do MainController e da camada de Repository (PersonRepository e AddressRepository).
+ *
+ * @see Service
+ * @see MainController
+ * @see PersonRepository
+ * @see AddressRepository 
+ */
 @Service
 public class MainService {
 
@@ -31,7 +40,12 @@ public class MainService {
     @Autowired
     AddressRepository addressRepository;
 
-    public Optional<PersonModel> addPerson(PersonRegisterRecordDto personRegisterDto){
+    /**
+     * Adiciona uma pessoa ao banco de dados.
+     * @param personRegisterDto DTO da pessoa.
+     * @return Optional
+     */
+    public Optional<PersonModel> addPerson(PersonRecordDto personRegisterDto){
         var personModel = new PersonModel();
         BeanUtils.copyProperties(personRegisterDto, personModel);
 
@@ -41,7 +55,7 @@ public class MainService {
                 
             Optional<PersonModel> personOptional = Optional.of(personRepository.save(personModel));
 
-            if(personOptional.isPresent()) personOptional.get().add(linkTo(methodOn(PersonController.class).getAllPersons()).withRel(PERSON_LIST));
+            if(personOptional.isPresent()) personOptional.get().add(linkTo(methodOn(MainController.class).getAllPersons()).withRel(PERSON_LIST));
             
 
             return personOptional;
@@ -52,30 +66,45 @@ public class MainService {
         }
     }
 
+    /**
+     * Retorna todas as pessoas do banco de dados, uma lista vazia caso não seja encontrada nenhuma ocorrência.
+     * @return List
+     */
     public List<PersonModel> getAllPersons(){
         List<PersonModel> personsList = personRepository.findAll();
 
         if(!personsList.isEmpty()){
             for(PersonModel person:personsList){
                 UUID id = person.getIdPerson();
-                person.add(linkTo(methodOn(PersonController.class).getPersonById(id)).withSelfRel());
+                person.add(linkTo(methodOn(MainController.class).getPersonById(id)).withSelfRel());
             }
         }
 
         return personsList;
     }
 
+    /**
+     * Busca e retorna uma pessoa com base no seu UUID.
+     * @param id UUID da pessoa.
+     * @return Optional.
+     */
     public Optional<PersonModel> getPersonById(UUID id){        
         Optional<PersonModel> person = personRepository.findById(id);
         
         if(person.isEmpty()){
             return person;
         }
-        person.get().add(linkTo(methodOn(PersonController.class).getAllPersons()).withRel(PERSON_LIST));
+        person.get().add(linkTo(methodOn(MainController.class).getAllPersons()).withRel(PERSON_LIST));
         return person;
     }
 
-    public Optional<PersonModel> updatePersonById(UUID id, PersonRegisterRecordDto person){
+    /**
+     * Atualiza o cadastro de uma pessoa, com base no seu UUID.
+     * @param id UUID da pessoa.
+     * @param person DTO da pessoa.
+     * @return Optional.
+     */
+    public Optional<PersonModel> updatePersonById(UUID id, PersonRecordDto person){
     Optional<PersonModel> optionalPersonModel;
         try {
             optionalPersonModel = personRepository.findById(id);
@@ -101,9 +130,9 @@ public class MainService {
 
         Optional<PersonModel> optionalPersonUpdated = Optional.of(personRepository.save(personModel));
         if(optionalPersonUpdated.isPresent()){
-            optionalPersonUpdated.get().add(linkTo(methodOn(PersonController.class).getAllPersons()).withRel(PERSON_LIST));
+            optionalPersonUpdated.get().add(linkTo(methodOn(MainController.class).getAllPersons()).withRel(PERSON_LIST));
             
-            optionalPersonUpdated.get().getAddressess().forEach(addressModel -> addressModel.add(linkTo(methodOn(PersonController.class).getPersonAddressesById(id)).withRel(PERSON_DATA)));
+            optionalPersonUpdated.get().getAddressess().forEach(addressModel -> addressModel.add(linkTo(methodOn(MainController.class).getPersonAddressesById(id)).withRel(PERSON_DATA)));
 
         } 
 
@@ -111,6 +140,11 @@ public class MainService {
 
     }
 
+    /**
+     * Exclui uma pessoa do banco de dados com base no seu UUID.
+     * @param id UUID da pessoa.
+     * @return Optional.
+     */
     public Optional<PersonModel> deletePersonById(UUID id){
         try{
         Optional<PersonModel> person = personRepository.findById(id);
@@ -127,6 +161,12 @@ public class MainService {
         }
     }
 
+    /**
+     * Adiciona um endereço a uma pessoa, com base no seu UUID.
+     * @param id UUID da pessoa;
+     * @param addressRecordDto DTO do endereço.
+     * @return Optional.
+     */
     public Optional<List<AddressModel>>  addAddressToPersonById(UUID id, AddressRecordDto addressRecordDto){
         Optional<PersonModel> personOptional;
         try {
@@ -164,7 +204,7 @@ public class MainService {
         
         List<AddressModel> resultAddressMoodels = new ArrayList<>();
         for(AddressModel am : addressOptional.get()){
-            am.add(linkTo(methodOn(PersonController.class).getPersonById(id)).withRel(PERSON_DATA));
+            am.add(linkTo(methodOn(MainController.class).getPersonById(id)).withRel(PERSON_DATA));
             resultAddressMoodels.add(am);
         }
 
@@ -176,6 +216,12 @@ public class MainService {
 
     }
 
+    /**
+     * Define um endereço como principal, com base no UUID da pessoa que possui o endereço, e no UUID do endereço.
+     * @param idPerson UUID da pessoa. 
+     * @param idAddress UUID do endereço.
+     * @return Optional.
+     */
     public Optional<List<AddressModel>> setMainAddressToPersonById(UUID idPerson, UUID idAddress){
         Optional<PersonModel> personOptional ;
         try {
@@ -213,7 +259,7 @@ public class MainService {
 
         tempAddressess = new ArrayList<>();
         for(AddressModel am : addressOptional.get()){
-            am.add(linkTo(methodOn(PersonController.class).getPersonById(idPerson)).withRel(PERSON_DATA));
+            am.add(linkTo(methodOn(MainController.class).getPersonById(idPerson)).withRel(PERSON_DATA));
             tempAddressess.add(am);
         }
 
@@ -222,6 +268,11 @@ public class MainService {
         return Optional.of(tempAddressess);
     }
 
+    /**
+     * Retorna todos os endereços de uma pessoa com base e seu UUID.
+     * @param id UUID da pessoa.
+     * @return Optional.
+     */
     public Optional<List<AddressModel>> getAllAddressesFromPersonById(UUID id){
         Optional<PersonModel> personOptional;
         try {
@@ -240,7 +291,7 @@ public class MainService {
 
         List<AddressModel> tempAddressess = new ArrayList<>();
         for(AddressModel am : addressOptional.get()){
-            am.add(linkTo(methodOn(PersonController.class).getPersonById(id)).withRel(PERSON_DATA));
+            am.add(linkTo(methodOn(MainController.class).getPersonById(id)).withRel(PERSON_DATA));
             tempAddressess.add(am);
         }
         personOptional.get().setAddressess(tempAddressess); 
@@ -249,6 +300,12 @@ public class MainService {
 
     }
 
+    /**
+     * Configura um endereço como principal, caso ele não esteja configurado.
+     *  Caso haja mais de um endereço principal, todos os outros endereços são alterados para não serem principais, e apenas o primeiro é mantido.
+     * @param addresses Lista de endereços.
+     * @return List.
+     */
     public List<AddressModel> configMainAddress(List<AddressModel> addresses){
         int mainAddressesSize = (int) addresses.stream().filter(AddressModel::getMainAddress).count();
 
@@ -259,7 +316,6 @@ public class MainService {
             addresses.forEach(address -> address.setMainAddress(false));
             addresses.get(0).setMainAddress(true);
         }
-
 
         return addresses;
     }

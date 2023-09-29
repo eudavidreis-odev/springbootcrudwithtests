@@ -13,6 +13,12 @@ import jakarta.persistence.Id;
 
 import jakarta.persistence.Table;
 
+/**
+ * AddressModel é o modelo de dados da tabela tb_address, onde serão armazenados os dados dos endereços.
+ * Esta classe é extendida da classe RepresentationModel, que é a classe que contém os métodos que facilitam a manipulação dos dados.
+ * 
+ * @see RepresentationModel
+ */
 @Entity
 @Table(name = "tb_address")
 public class AddressModel extends RepresentationModel<AddressModel> implements Serializable {
@@ -33,6 +39,10 @@ public class AddressModel extends RepresentationModel<AddressModel> implements S
     private boolean mainAddress = false;
 
     
+    
+    /** 
+     * @return long
+     */
     public static long getSerialversionuid() {
         return serialVersionUID;
     }
